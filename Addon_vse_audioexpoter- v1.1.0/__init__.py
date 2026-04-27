@@ -1,8 +1,8 @@
 bl_info = {
     "name": "Audio Exporter",
     "author": "Dinesh007",
-    "version": (1, 1, 0),
-    "blender": (4, 5, 0),
+    "version": (1, 2, 0),
+    "blender": (5, 1, 0),
     "location": "Sequencer > View(Menu) > Audio Export",
     "description": "Export audio from selected strips in the VSE as separate or combined files ",
     "category": "Sequencer",
@@ -386,7 +386,7 @@ class SEQUENCER_OT_export_audio_filebrowser(Operator):
         # Selected strips info
         seq = context.scene.sequence_editor
         if seq:
-            selected = [s for s in seq.sequences if s.select and s.type == 'SOUND']
+            selected = [s for s in seq.strips if s.select and s.type == 'SOUND']
             if selected:
                 strips_box = box.box()
                 strips_box.label(text=f"Selected Audio Strips ({len(selected)}):", icon='SOUND')
@@ -401,7 +401,7 @@ class SEQUENCER_OT_export_audio_filebrowser(Operator):
             self.report({'ERROR'}, "No sequence editor found")
             return {'CANCELLED'}
 
-        selected_strips = [s for s in seq.sequences if s.select and s.type == 'SOUND']
+        selected_strips = [s for s in seq.strips if s.select and s.type == 'SOUND']
         if not selected_strips:
             self.report({'ERROR'}, "No selected sound strips found")
             return {'CANCELLED'}
@@ -435,7 +435,7 @@ class SEQUENCER_OT_export_audio_filebrowser(Operator):
             self.report({'ERROR'}, "No sequence editor found")
             return {'CANCELLED'}
 
-        selected_strips = [s for s in seq.sequences if s.select and s.type == 'SOUND']
+        selected_strips = [s for s in seq.strips if s.select and s.type == 'SOUND']
         if not selected_strips:
             self.report({'ERROR'}, "No selected sound strips found")
             return {'CANCELLED'}
@@ -516,7 +516,7 @@ class SEQUENCER_OT_export_audio_filebrowser(Operator):
 
             # Mute other strips
             original_mute_states = {}
-            for s in scene.sequence_editor.sequences:
+            for s in scene.sequence_editor.strips:
                 if s.type == 'SOUND' and s != strip:
                     original_mute_states[s] = s.mute
                     s.mute = True
@@ -559,7 +559,7 @@ class SEQUENCER_OT_export_audio_filebrowser(Operator):
                     original_volumes = self.apply_volume_to_strips([strip], self.volume)
 
                     original_mute_states = {}
-                    for s in scene.sequence_editor.sequences:
+                    for s in scene.sequence_editor.strips:
                         if s.type == 'SOUND' and s != strip:
                             original_mute_states[s] = s.mute
                             s.mute = True
@@ -583,7 +583,7 @@ class SEQUENCER_OT_export_audio_filebrowser(Operator):
             original_volumes = self.apply_volume_to_strips(strips, self.volume)
 
             original_mute_states = {}
-            for s in scene.sequence_editor.sequences:
+            for s in scene.sequence_editor.strips:
                 if s.type == 'SOUND' and s not in strips:
                     original_mute_states[s] = s.mute
                     s.mute = True
@@ -616,7 +616,7 @@ class SEQUENCER_OT_export_audio_filebrowser(Operator):
 
             for audio_file in input_files:
                 if os.path.exists(audio_file):
-                    strip = temp_scene.sequence_editor.sequences.new_sound(
+                    strip = temp_scene.sequence_editor.strips.new_sound(
                         name=os.path.basename(audio_file),
                         filepath=audio_file,
                         channel=1,
@@ -674,7 +674,7 @@ def menu_func(self, context):
     if context.space_data.type == 'SEQUENCE_EDITOR':
         seq = context.scene.sequence_editor
         has_selected_audio = (seq and 
-                            any(s.select and s.type == 'SOUND' for s in seq.sequences))
+                            any(s.select and s.type == 'SOUND' for s in seq.strips))
         
         op = self.layout.operator("sequencer.export_audio_filebrowser", icon='SOUND')
         if not has_selected_audio:
